@@ -45,27 +45,27 @@
 /* The real deal */
 %%
 prog     : external               {}
-	     ;
+         ;
 
 external :                        {}
-		 | external import        {}
-		 ;
+         | external import        {}
+         ;
 
 import   : IMPORT ARR_STR         { import($1, "<>"  , $2); }
          | IMPORT QUOTE_STR       { import($1, "\"\"", $2); }
-	     | func
-	     ;
-	
+         | func
+         ;
+    
 func     :                        {}
-	     | func func_decl FEND    { fend(); }
-	     ;
+         | func func_decl FEND    { fend(); }
+         ;
 
 func_decl: FUNC ARR_STR STR fargs { printf("%s %s%s {", $2, $3, $4); }
-		 | FUNC STR fargs         { printf("%s%s {", $2, $3); }
-		 ;
+         | FUNC STR fargs         { printf("%s%s {", $2, $3); }
+         ;
 
 fargs    : ARG_STR                { $$ = $1; }
-	     ;
+         ;
 %%
 
 /* Parser */
