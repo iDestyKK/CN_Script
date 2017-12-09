@@ -1,0 +1,7 @@
+#import "import3.cns"
+
+func<int> bar():
+	fend
+
+func<double> yes(int a, int b):
+	fend

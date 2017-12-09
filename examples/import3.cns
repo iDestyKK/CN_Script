@@ -1,0 +1,5 @@
+#import <io>
+#import "nested_import/import4.cns"
+
+func<double> foo():
+	fend

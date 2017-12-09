@@ -83,6 +83,7 @@ main(int argc, char** argv) {
 	else {
 		fp = fopen(argv[1], "r");
 		yyin = fp;
+		CUR_FILE = argv[1];
 		if (yyparse()) {
 			yyerror("syntax error");
 		}

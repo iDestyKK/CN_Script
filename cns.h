@@ -15,9 +15,11 @@
 #ifndef __CNS_H__
 #define __CNS_H__
 
-void import(char*, char*, char*);
+/* Globals */
+char* CUR_FILE;
 
 /* Functions */
+void import(char*, char*, char*);
 void fend();
 
 #endif

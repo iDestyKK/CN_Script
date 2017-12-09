@@ -26,7 +26,7 @@
 %}
 
 %option noyywrap nounput yylineno
-%x INLINE_C COMMENT FUNC_DECL
+%x      INLINE_C COMMENT FUNC_DECL
 
 ascii          [a-zA-Z_]
 ascii_num      [a-zA-Z0-9_]

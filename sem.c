@@ -31,7 +31,19 @@ void import(char* type, char* bounds, char* val) {
 		readlink("/proc/self/exe", exe_path, MAX_PATH);
 
 		if (bounds[0] == '\"' && bounds[1] == bounds[0]) {
-			getcwd(path, MAX_PATH);
+			//getcwd(path, MAX_PATH);
+			strcpy(path, CUR_FILE);
+
+			//Get rid of executable name
+			size_t buf = strlen(path) - 1;
+			char t;
+			while (1) {
+				t = path[buf];
+				path[buf] = 0;
+				if (t == '/' || buf == 0)
+					break;
+				buf--;
+			}
 			strcat(path, "/");
 			strcat(path, val);
 		}
