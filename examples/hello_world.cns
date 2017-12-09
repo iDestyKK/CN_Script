@@ -1,0 +1,4 @@
+#import <io>
+
+func main():
+	printf("Hello World!\n");

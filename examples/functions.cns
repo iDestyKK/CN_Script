@@ -1,0 +1,10 @@
+#import <io>
+
+func<int> ya():
+	//Sample function to just return "2".
+	return 2;
+	fend
+
+func main():
+	printf("%d\n", ya());
+	fend

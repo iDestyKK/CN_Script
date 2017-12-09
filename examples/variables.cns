@@ -1,0 +1,7 @@
+#import <io>
+
+func main():
+	int a;
+	a = 0;
+
+	printf("a is %d\n", a);
