@@ -6,7 +6,7 @@
 #
 
 CC     = gcc
-CFLAGS = --std=gnu89
+CFLAGS = -g --std=gnu89
 PARSER = bison
 PFLAGS = -d
 LEX    = flex

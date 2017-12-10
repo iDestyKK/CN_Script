@@ -22,8 +22,8 @@
 #define MAX_PATH 4096
 
 void import(char* type, char* bounds, char* val) {
-	if (strcmp(type, "import ") == 0) {
-		printf("//%s%c%s%c\n", type, bounds[0], val, bounds[1]);
+	if (strcmp(type, "import") == 0) {
+		printf("//%s %c%s%c\n", type, bounds[0], val, bounds[1]);
 		char path    [MAX_PATH];
 		char exe_path[MAX_PATH];
 
@@ -63,7 +63,7 @@ void import(char* type, char* bounds, char* val) {
 			}
 			strcat(path, "/lib/");
 			strcat(path, val);
-			strcat(path, ".c");
+			strcat(path, ".cns");
 		}
 		printf(
 			"// ---\n"
@@ -114,6 +114,7 @@ void import(char* type, char* bounds, char* val) {
 				putchar(c);
 			}
 			fclose(ya);
+
 			//Hi Dr. Plank
 			int status;
 			waitpid(fk, &status, 0);
@@ -141,10 +142,58 @@ void import(char* type, char* bounds, char* val) {
 		);
 	}
 	else
-		printf("#%s%c%s%c", type, bounds[0], val, bounds[1]);
+		printf("#%s %c%s%c", type, bounds[0], val, bounds[1]);
 }
 
 /* Functions */
 void fend() {
 	printf("}");
+}
+
+/* Functions you shouldn't really use... */
+char* malloc_concat(char* s1, char* s2) {
+	size_t l1, l2;
+	char* s3;
+	l1 = strlen(s1);
+	l2 = strlen(s2);
+
+	//You MUST call free on this.
+	s3 = (char *) malloc(l1 + l2 + 1);
+	s3[l1 + l2] = 0;
+	memcpy(s3     , s1, l1);
+	memcpy(&s3[l1], s2, l2);
+
+	return s3;
+}
+char* realloc_concat(char* s1, char* s2) {
+	size_t l1, l2;
+	char* s3;
+	l1 = strlen(s1);
+	l2 = strlen(s2);
+
+	//You MUST call free on this.
+	s1 = (char *) realloc(s1, l1 + l2 + 1);
+	s1[l1 + l2] = 0;
+	memcpy(&s1[l1], s2, l2);
+
+	return s1;
+}
+
+char* realloc_rconcat(char* s1, char* s2) {
+	size_t l1, l2;
+	char* s3;
+	l1 = strlen(s1);
+	l2 = strlen(s2);
+
+	//You MUST call free on this.
+	s2 = (char *) realloc(s2, l1 + l2 + 1);
+	s2[l1 + l2] = 0;
+	memcpy(&s2[l2], s1, l1);
+
+	return s2;
+}
+
+void freeifnull(void* ptr) {
+	if ((char*)ptr != NULL)
+		free(ptr);
 }

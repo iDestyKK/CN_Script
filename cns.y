@@ -16,6 +16,7 @@
 	/* C Includes */
 	#include <stdio.h>
 	#include <stdlib.h>
+	#include <string.h>
 
 	/* Custom Includes */
 	#include "cns.h"
@@ -29,12 +30,12 @@
 }
 
 /* Passed via string */
-%token <str> ID CON ARR_STR ARG_STR QUOTE_STR STR IMPORT
+%token <str> ID CON ARR_STR ARG_STR QUOTE_STR STR IMPORT NAME FNAME TYPE
 
 /* Passed by other means */
 %token INT UINT FLOAT DOUBLE CHAR UCHAR
-%token FUNC_TOP FUNC LEFT_PAREN RIGHT_PAREN FEND
-%type <str> fargs
+%token FUNC_TOP FUNC LEFT_PAREN RIGHT_PAREN FEND ANGLE_LT ANGLE_GT
+%type <str> fargs arg
 
 /* Precedence */
 /*
@@ -44,27 +45,39 @@
 
 /* The real deal */
 %%
-prog     : external               {}
+prog     : external                         {}
          ;
 
-external :                        {}
-         | external import        {}
+external :                                  {}
+         | external import                  {}
          ;
 
-import   : IMPORT ARR_STR         { import($1, "<>"  , $2); }
-         | IMPORT QUOTE_STR       { import($1, "\"\"", $2); }
+import   : IMPORT '<' NAME '>'             { import($1, "<>"  , $3); }
+         | IMPORT '"' NAME '"'             { import($1, "\"\"", $3); }
          | func
          ;
     
-func     :                        {}
-         | func func_decl FEND    { fend(); }
+func     :                                  {}
+         | func func_decl FEND              { fend(); }
          ;
 
-func_decl: FUNC ARR_STR STR fargs { printf("%s %s%s {", $2, $3, $4); }
-         | FUNC STR fargs         { printf("%s%s {", $2, $3); }
+func_decl: FUNC '<' NAME '>' NAME fargs ':' { printf("%s %s(%s) {", $3, $5, ($6 == NULL) ? "" : $6);
+		                                      freeifnull($6); }
+         | FUNC NAME fargs ':'              { printf("%s(%s) {", $2, ($3 == NULL) ? "" : $3);
+		                                      freeifnull($3); }
          ;
 
-fargs    : ARG_STR                { $$ = $1; }
+fargs    : '(' ')'                          { $$ = NULL; }
+         | '(' arg ')'                      { $$ = $2; }
+         ;
+
+arg      : NAME NAME ',' arg                { $$ = malloc_concat ($1, " ");
+                                              $$ = realloc_concat($$, $2);
+                                              $$ = realloc_concat($$, ", ");
+                                              $$ = realloc_concat($$, $4);
+                                              free($4); }
+         | NAME NAME                        { $$ = malloc_concat  ($1 , " ");
+                                              $$ = realloc_concat ($$, $2 ); }
          ;
 %%
 

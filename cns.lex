@@ -30,10 +30,12 @@
 
 ascii          [a-zA-Z_]
 ascii_num      [a-zA-Z0-9_]
+fname          [a-zA-Z0-9_\.\/\\]
 ptr            [\*]
+array          [\[\]]
 
+type {ptr}*{ascii}{ascii_num}*{ptr}*(\[\])*
 name {ascii}{ascii_num}*
-type {ptr}*{name}
 
 %%
  /* Lex Grammar */
@@ -44,61 +46,45 @@ type {ptr}*{name}
   * ---------------------------------------------------------------------------
   */
 
-"#"{name}" " {
-	/*
-	 * External Define
-	 *
-	 * This is for "#import", "#cimport", etc.
-	 */
-	if (strcmp(yytext, "#cimport ") == 0) {
-		yylval.str = "include ";
-	}
-	else
-		yylval.str = strdup(yytext + 1);
+"#import" {
+	/* CN_Script Import */
+	yylval.str = "import";
 	return IMPORT;
 }
 
-"(".*"):" {
-	/*
-	 * Type Array Bracket Declaration
-	 */
-	yytext[yyleng - 1] = 0;
-	yylval.str = strdup(yytext);
-	return ARG_STR;
+"#cimport" {
+	/* C Import */
+	yylval.str = "include";
+	return IMPORT;
 }
 
 "func" { return FUNC; }
 "fend" { return FEND; }
 
+ /*
+  * ---------------------------------------------------------------------------
+  * CN_SCRIPT OPERATORS
+  * ---------------------------------------------------------------------------
+  */
+"("  |
+")"  |
+"<"  |
+">"  |
+":"  |
+","  |
+"\"" { return yytext[0]; }
 
-"<".*">" {
-	/*
-	 * Type Array Bracket Declaration
-	 */
-	yytext[yyleng - 1] = 0;
-	yylval.str = strdup(yytext + 1);
-	return ARR_STR;
-}
-
-"\"".*"\"" {
-	/*
-	 * Type Array Bracket Declaration
-	 */
-	yytext[yyleng - 1] = 0;
-	yylval.str = strdup(yytext + 1);
-	return QUOTE_STR;
-}
-
-"("    { return LEFT_PAREN;  }
-")"    { return RIGHT_PAREN; }
-
-{name} {
+{fname}+ |
+{type}   |
+{name}   {
 	/*
 	 * Type Array Bracket Declaration
 	 */
 	yylval.str = strdup(yytext);
-	return STR;
+	return NAME;
 }
+
+
 
 "/*".*"*/" {
 	/* Multi-line comment */
@@ -155,4 +141,6 @@ type {ptr}*{name}
 	printf("%s", yytext);
 }
 
-. {}
+. {
+	//return yytext[0];
+}

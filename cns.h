@@ -22,4 +22,10 @@ char* CUR_FILE;
 void import(char*, char*, char*);
 void fend();
 
+/* Functions you shouldn't really use... */
+char* malloc_concat(char*, char*);
+char* realloc_concat(char*, char*);
+char* realloc_rconcat(char*, char*);
+void freeifnull(void*);
+
 #endif
