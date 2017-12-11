@@ -34,8 +34,9 @@ fname          [a-zA-Z0-9_\.\/\\]
 ptr            [\*]
 array          [\[\]]
 
-type {ptr}*{ascii}{ascii_num}*{ptr}*(\[\])*
-name {ascii}{ascii_num}*
+name           {ascii}{ascii_num}*
+type           {ptr}*{name}{ptr}*(\[\])*
+templated_type {ptr}*^"func"\<{name}(\,{name})*\>{ptr}*(\[\])*
 
 %%
  /* Lex Grammar */
@@ -58,6 +59,26 @@ name {ascii}{ascii_num}*
 	return IMPORT;
 }
 
+"/*" {
+	/* Multi-line comment */
+	printf("%s", yytext);
+	BEGIN COMMENT;
+}
+
+<COMMENT>"*/" {
+	printf("%s", yytext);
+	BEGIN 0;
+}
+
+<COMMENT>. {
+	printf("%s", yytext);
+}
+
+"//".*"\n" {
+	/* Single-line comment */
+	printf("%s", yytext);
+}
+
 "func" { return FUNC; }
 "fend" { return FEND; }
 
@@ -72,28 +93,18 @@ name {ascii}{ascii_num}*
 ">"  |
 ":"  |
 ","  |
-"\"" { return yytext[0]; }
+"\"" |
+";"  { return yytext[0]; }
 
 {fname}+ |
 {type}   |
+{templated_type}   |
 {name}   {
 	/*
 	 * Type Array Bracket Declaration
 	 */
 	yylval.str = strdup(yytext);
 	return NAME;
-}
-
-
-
-"/*".*"*/" {
-	/* Multi-line comment */
-	printf("%s", yytext);
-}
-
-"//".*"\n" {
-	/* Single-line comment */
-	printf("%s", yytext);
 }
 
  /*
@@ -138,6 +149,10 @@ name {ascii}{ascii_num}*
   * ---------------------------------------------------------------------------
   */
 [\r\n]+ {
+	printf("%s", yytext);
+}
+
+[\t]+ {
 	printf("%s", yytext);
 }
 

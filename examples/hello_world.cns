@@ -1,3 +1,17 @@
+/*
+ * CN_Script: Hello World Example
+ *
+ * Description:
+ *     Function Calls in CN_Script are the mostly same as in C. There are a few
+ *     twists which make it similar to C++, but you should feel right at home
+ *     with this if you are used to C/C++.
+ *
+ *     This program just simply prints out "Hello World!\n". Simple. 
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
 #import <io>
 
 func main():

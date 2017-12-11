@@ -1,10 +1,22 @@
+/*
+ * CN_Script: Functions Example
+ *
+ * Description:
+ *     CN_Script Functions are designed differently from C/C++ functions. But,
+ *     they are called in the same fashion as C/C++. This example initialises
+ *     two functions. One with a return type, and one without a return type.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
 #import <io>
 
-func<int> ya():
-	//Sample function to just return "2".
-	return 2;
+func<int> add(int a, int b):
+	//Sample function to just add 2 numbers together.
+	return (a + b);
 	fend
 
 func main():
-	printf("%d\n", ya());
+	printf("%d\n", add(a, b));
 	fend

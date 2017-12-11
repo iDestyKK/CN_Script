@@ -1,3 +1,18 @@
+/*
+ * CN_Script: Nested Include Example 2
+ *
+ * Description:
+ *     Using the "#import" keyword allows you to include other CN_Script source
+ *     files directly in your project. You may use <XXX> to include something
+ *     from the transpiler's "lib" directory, or use "XXX" to include something
+ *     from the source file's directory. This example is included in the file
+ *     "import1.cns", and includes "import3.cns". This is to demonstrate nested
+ *     include statements.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
 #import "import3.cns"
 
 func<int> bar():

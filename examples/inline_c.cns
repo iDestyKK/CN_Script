@@ -1,3 +1,18 @@
+/*
+ * CN_Script: Inline C Example
+ *
+ * Description:
+ *     In CN_Script, you can inline raw C into your code via the "__INLINE_C"
+ *     tag. This will allow you to embed the C programming language directly
+ *     into your code. The interpreter will copy the code verbatimly into the
+ *     generated C file. Because variable names do not change between CN_Script
+ *     and C, you may modify CN_Script variables directly inside of your inline
+ *     C code.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
 #import <io>
 
 func main():

@@ -35,7 +35,7 @@
 /* Passed by other means */
 %token INT UINT FLOAT DOUBLE CHAR UCHAR
 %token FUNC_TOP FUNC LEFT_PAREN RIGHT_PAREN FEND ANGLE_LT ANGLE_GT
-%type <str> fargs arg
+%type <str> fargs arg stmt decl_var more_var temp
 
 /* Precedence */
 /*
@@ -45,40 +45,79 @@
 
 /* The real deal */
 %%
-prog     : external                         {}
+prog     : external                            { }
          ;
 
-external :                                  {}
-         | external import                  {}
+external :                                     { }
+         | external import                     { }
          ;
 
-import   : IMPORT '<' NAME '>'             { import($1, "<>"  , $3); }
-         | IMPORT '"' NAME '"'             { import($1, "\"\"", $3); }
+import   : IMPORT '<' NAME '>'                 { import($1, "<>"  , $3); }
+         | IMPORT '"' NAME '"'                 { import($1, "\"\"", $3); }
          | func
          ;
     
-func     :                                  {}
-         | func func_decl FEND              { fend(); }
+func     :                                     { }
+         | func func_decl fbody FEND           { fend(); }
          ;
 
-func_decl: FUNC '<' NAME '>' NAME fargs ':' { printf("%s %s(%s) {", $3, $5, ($6 == NULL) ? "" : $6);
-		                                      freeifnull($6); }
-         | FUNC NAME fargs ':'              { printf("%s(%s) {", $2, ($3 == NULL) ? "" : $3);
-		                                      freeifnull($3); }
+func_decl: FUNC '<' NAME '>' NAME fargs ':'    { printf("%s %s(%s) {", $3, $5, ($6 == NULL) ? "" : $6);
+                                                 freeifnull($6); }
+         | FUNC NAME fargs ':'                 { printf("%s(%s) {", $2, ($3 == NULL) ? "" : $3);
+                                                 freeifnull($3); }
          ;
 
-fargs    : '(' ')'                          { $$ = NULL; }
-         | '(' arg ')'                      { $$ = $2; }
+fargs    : '(' ')'                             { $$ = NULL; }
+         | '(' arg ')'                         { $$ = $2; }
          ;
 
-arg      : NAME NAME ',' arg                { $$ = malloc_concat ($1, " ");
-                                              $$ = realloc_concat($$, $2);
-                                              $$ = realloc_concat($$, ", ");
-                                              $$ = realloc_concat($$, $4);
-                                              free($4); }
-         | NAME NAME                        { $$ = malloc_concat  ($1 , " ");
-                                              $$ = realloc_concat ($$, $2 ); }
+arg      : NAME NAME ',' arg                   { $$ = malloc_concat ($1, " " );
+                                                 $$ = realloc_concat($$, $2  );
+                                                 $$ = realloc_concat($$, ", ");
+                                                 $$ = realloc_concat($$, $4  );
+                                                 free($4); }
+         | NAME NAME                           { $$ = malloc_concat ($1, " " );
+                                                 $$ = realloc_concat($$, $2  ); }
          ;
+
+fbody    :                                     { }
+         | fbody stmt ';'                      { printf("%s;", $2); }
+         ;
+
+stmt     : decl_var                            { $$ = $1; }
+         | NAME                                { $$ = $1; }
+         ;
+
+decl_var : NAME NAME ',' more_var              { $$ = malloc_concat ($1, " " );
+                                                 $$ = realloc_concat($$, $2  );
+                                                 $$ = realloc_concat($$, ", ");
+                                                 $$ = realloc_concat($$, $4  );
+                                                 free($4); }
+         | NAME '<' temp '>' NAME ',' more_var { $$ = malloc_concat ($1, "_" );
+                                                 $$ = realloc_concat($$, $3  );
+                                                 $$ = realloc_concat($$, " " );
+                                                 $$ = realloc_concat($$, $5  );
+                                                 $$ = realloc_concat($$, ", ");
+                                                 $$ = realloc_concat($$, $7  );
+                                                 free($7); }
+         | NAME NAME                           { $$ = malloc_concat ($1, " " );
+                                                 $$ = realloc_concat($$, $2  ); }
+         | NAME '<' temp '>' NAME              { $$ = malloc_concat ($1, "_" );
+                                                 $$ = realloc_concat($$, $3  );
+                                                 $$ = realloc_concat($$, " " );
+                                                 $$ = realloc_concat($$, $5  ); }
+         ;
+
+more_var : NAME ',' more_var                   { $$ = malloc_concat ($1, ", ");
+                                                 $$ = realloc_concat($$, $3  );
+                                                 free($3); }
+         | NAME                                { $$ = malloc_concat ($1, ""  ); }
+         ;
+
+temp     : NAME ',' temp                       { $$ = malloc_concat ($1, "_" );
+                                                 $$ = realloc_concat($$, $3  );
+                                                 free($3); }
+         | NAME                                { $$ = malloc_concat ($1, ""  ); }
 %%
 
 /* Parser */

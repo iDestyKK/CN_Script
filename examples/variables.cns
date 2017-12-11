@@ -1,7 +1,26 @@
+/*
+ * CN_Script: Variable Declaration Example
+ *
+ * Description:
+ *     Variables in CN_Script can be introduced in the same fashion as in C.
+ *     You may also declare dynamic function types via the template syntax just
+ *     like in C++, as demonstrated below. The parser will convert it into a
+ *     static type and generate it at parse-time.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
 #import <io>
 
-func main():
-	int a;
-	a = 0;
+func<int> main():
+	int a, b;
+	double f;
+	vector<int> a;
+	string str;
 
-	printf("a is %d\n", a);
+	fend
+
+func yes():
+	float d;
+	fend
