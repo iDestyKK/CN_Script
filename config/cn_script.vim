@@ -23,7 +23,7 @@ unlet b:current_syntax
 syn region INLINE_C matchgroup=Snip start="__INLINE_C {" end="}" contains=@C
 
 hi link Snip SpecialComment
-let b:current_syntax = 'cns'
+let b:current_syntax = 'cn_script'
 
 
 " ----------------------
