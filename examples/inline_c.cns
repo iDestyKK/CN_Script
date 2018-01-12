@@ -15,11 +15,11 @@
 
 #import <io>
 
-func main():
+func main() {
 	__INLINE_C {
 		int i = 0;
 		for (; i < 12; i++) {
 			printf("%d\n", i);
 		}
 	}
-	fend
+}

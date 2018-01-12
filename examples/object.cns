@@ -1,0 +1,21 @@
+/*
+ * CN_Script: Objects
+ *
+ * Description:
+ *     CN_Script uses a modification of structs that I like to call "Objects".
+ *     Objects aren't entirely classes, nor do they have permissions like C++
+ *     (i.e., public, private, protected, etc).
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
+#import <io>
+
+object yes {
+	int a, b;
+};
+
+func main() {
+	yes obj;
+}

@@ -1,0 +1,22 @@
+/*
+ * CN_Script: While Loop Example
+ *
+ * Description:
+ *     CN_Script offers "While Loops" in the same exact fashion as in C. Now,
+ *     it also allows for other different kinds of loops, which are shown in
+ *     other examples.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
+#import <io>
+
+func<int> main() {
+	int a = 0;
+
+	while (a != 10) {
+		printf("a = %d\n", a);
+		a += 1;
+	}
+}

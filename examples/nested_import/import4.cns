@@ -17,5 +17,6 @@
 
 #import <io>
 
-func<double> oh_yes():
-	fend
+func<double> oh_yes() {
+	
+}

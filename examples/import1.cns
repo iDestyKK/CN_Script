@@ -16,5 +16,6 @@
 #import <io>
 #import "import2.cns"
 
-func main():
-	fend
+func main() {
+
+}

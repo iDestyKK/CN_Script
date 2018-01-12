@@ -2,14 +2,15 @@
 " Language: CN_Script
 " Maintainer: Clara Nguyen
 " Latest Revision: 2017-12-11
-
+"
+" Check: {{{1
 if exists('b:current_syntax')
   finish
 endif
 
-" ----------------------
-" Inline C Support
-" ----------------------
+" ------------------------------------
+" Inline C Support: {{{1
+
 let b:current_syntax = ''
 unlet b:current_syntax
 runtime! syntax/c.vim
@@ -26,27 +27,25 @@ hi link Snip SpecialComment
 let b:current_syntax = 'cn_script'
 
 
-" ----------------------
-" Comments
-" ----------------------
+" ------------------------------------
+" Comments: {{{1
 
-" Single Line Comment
+"  Single Line Comment: {{{1
 syn match CNS_SL_Comment '\/\/.*$'
 hi def link CNS_SL_Comment Comment
 
-" Multi-Line Comment
+"  Multi-Line Comment: {{{1
 syn region CNS_ML_Comment start='\/\*' end='\*\/'
 hi def link CNS_ML_Comment Comment
 
-" ----------------------
-" Data types
-" ----------------------
+" ------------------------------------
+" Data types: {{{1
 
-" Strings
+"  Strings {{{1
 syn region CNS_String start='"' end='"'
 hi def link CNS_String constant
 
-" Import Statements
+"  Import Statements {{{1
 syn match CNS_ImportINIT '#import .*$' contains=CNS_Import
 hi def link CNS_ImportINIT Identifier
 
@@ -56,9 +55,9 @@ hi def link CNS_Import constant
 syn keyword Keyword fend __INLINE_C
 hi def link Keyword constant
 
-" ----------------------
-" Function Calls
-" ----------------------
+" ------------------------------------
+" Function Calls {{{1
+
 syn match CNS_Function 'func\(<.\{-}>\)\?' contains=CNS_Function_Parametre,CNS_Function_Name,CNS_Function_Type
 hi def link CNS_Function Keyword
 

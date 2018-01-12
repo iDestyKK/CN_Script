@@ -37,6 +37,8 @@ array          [\[\]]
 name           {ascii}{ascii_num}*
 type           {ptr}*{name}{ptr}*(\[\])*
 templated_type {ptr}*^"func"\<{name}(\,{name})*\>{ptr}*(\[\])*
+double_t       [0-9]+\.[0-9]+
+int_t          [0-9]+
 
 %%
  /* Lex Grammar */
@@ -79,22 +81,83 @@ templated_type {ptr}*^"func"\<{name}(\,{name})*\>{ptr}*(\[\])*
 	printf("%s", yytext);
 }
 
-"func" { return FUNC; }
-"fend" { return FEND; }
+"func"   { return FUNC; }
+"fend"   { return FEND; }
+"object" { return OBJECT; }
+
+ /*
+  * ---------------------------------------------------------------------------
+  * CN_SCRIPT LOOPS & CONDITIONALS
+  * ---------------------------------------------------------------------------
+  */
+"if"      { return IF; }      /* For "If" statements                      */
+"else"    { return ELSE; }    /* If an "if" condition fails, execute this */
+"for"     { return FOR; }     /* For "For" loops                          */
+"do"      { return DO; }      /* For "Do-While" and "Do-Until" loops      */
+"while"   { return WHILE; }   /* For "While" and "Do-While" loops         */
+"until"   { return UNTIL; }   /* For "Do-Until" loops                     */
+"repeat"  { return REPEAT; }  /* Repeat X number of times                 */
+"loop"    { return LOOP;    } /* Loop forever until broken                */
 
  /*
   * ---------------------------------------------------------------------------
   * CN_SCRIPT OPERATORS
   * ---------------------------------------------------------------------------
   */
+
+"=="         { return EQ; }
+"+="         { return ADDEQ; }
+"-="         { return SUBEQ; }
+"*="         { return MULEQ; }
+"/="         { return DIVEQ; }
+"%="         { return MODEQ; }
+"<<="        { return LSEQ; }
+">>="        { return RSEQ; }
+"&="         { return ANDEQ; }
+"|="         { return OREQ; }
+"^="         { return XOREQ; }
+"!="         { return NOTEQ; }
+"<="         { return LEQ; }
+">="         { return GEQ; }
+
+("&&"|"and") { return AND; }
+("||"|"or")  { return OR; }
+("^^"|"xor") { return XOR; }
+
 "("  |
 ")"  |
+"{"  |
+"}"  |
 "<"  |
 ">"  |
 ":"  |
 ","  |
 "\"" |
+"="  |
+"+"  |
+"-"  |
+"*"  |
+"/"  |
+"%"  |
+"|"  |
+"&"  |
+"^"  |
+"!"  |
 ";"  { return yytext[0]; }
+
+{int_t} { 
+	yylval.str = strdup(yytext);
+	return INT; 
+}
+{double_t} {
+	yylval.str = strdup(yytext);
+	return DOUBLE;
+}
+
+"\"".*"\"" {
+	yylval.str = strdup(yytext);
+	return STRING_LITERAL;
+}
 
 {fname}+ |
 {type}   |

@@ -1,0 +1,22 @@
+/*
+ * CN_Script: Generic Loop Example
+ *
+ * Description:
+ *     CN_Script offers a new kind of loop called "Generic Loop". These are a
+ *     very lazy way to say "I want to loop this forever (until 'break' is
+ *     called)". It literally translates to "while (1)".
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
+#import <io>
+
+func<int> main() {
+	int a = 0;
+
+	loop {
+		printf("a = %d\n", a);
+		a += 1;
+	}
+}

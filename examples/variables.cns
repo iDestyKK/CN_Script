@@ -13,14 +13,13 @@
 
 #import <io>
 
-func<int> main():
+func<int> main() {
 	int a, b;
 	double f;
 	vector<int> a;
 	string str;
+}
 
-	fend
-
-func yes():
+func yes() {
 	float d;
-	fend
+}

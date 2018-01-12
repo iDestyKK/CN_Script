@@ -15,8 +15,10 @@
 
 #import "import3.cns"
 
-func<int> bar():
-	fend
+func<int> bar() {
+	
+}
 
-func<double> yes(int a, int b):
-	fend
+func<double> yes(int a, int b) {
+	
+}

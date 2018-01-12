@@ -1,0 +1,23 @@
+/*
+ * CN_Script: Until Loop Example
+ *
+ * Description:
+ *     CN_Script offers a new kind of loop called "Until Loops". These act like
+ *     "While Loops", except the condition is reversed. So essentially we loop
+ *     "until" the condition is true, as opposed to looping until the condition
+ *     is false.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
+#import <io>
+
+func<int> main() {
+	int a = 0;
+
+	until (a == 10) {
+		printf("a = %d\n", a);
+		a += 1;
+	}
+}
