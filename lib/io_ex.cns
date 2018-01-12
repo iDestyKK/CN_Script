@@ -1,7 +1,3 @@
-#cimport <stdio.h>
-#cimport <stdlib.h>
-#cimport <string.h>
-
 func error_print(char* str) {
 	fprintf(stderr, "%s", str);
 }

@@ -35,7 +35,7 @@
 /* Passed by other means */
 %token INT UINT FLOAT DOUBLE CHAR UCHAR STRING_LITERAL
 %token FUNC_TOP FUNC LEFT_PAREN RIGHT_PAREN FEND ANGLE_LT ANGLE_GT OBJECT
-%token IF ELSE FOR DO WHILE UNTIL REPEAT LOOP
+%token IF ELSE FOR DO WHILE UNTIL REPEAT LOOP INCREMENT DECREMENT CONT_IF BRK_IF
 %token EQ ADDEQ SUBEQ MULEQ DIVEQ MODEQ LSEQ RSEQ ANDEQ OREQ XOREQ LEQ GEQ NOTEQ AND OR XOR
 %type <str> fargs arg stmt cnsexpr expr exprs decl_var more_var temp obj_decl
 %type <str> INT
@@ -60,7 +60,9 @@ external :                                     { }
          ;
 
 import   : IMPORT '<' NAME '>'                 { import($1, "<>"  , $3); }
-         | IMPORT '"' NAME '"'                 { import($1, "\"\"", $3); }
+         | IMPORT STRING_LITERAL               { $2++;
+		                                         $2[strlen($2) - 1] = 0;
+		                                         import($1, "\"\"", $2); }
          ;
 
 object   : obj_decl '{' obj_body '}' ';' { printf("} %s;", $1); }
@@ -104,8 +106,18 @@ arg      : NAME NAME ',' arg                   { $$ = malloc_concat ($1, " " );
 
 fbody    :                                     { }
          | fbody stmt ';'                      { printf("%s;", $2); }
+		 | fbody CONT_IF '(' cnsexpr ')' ';'   { printf("if (%s) continue;", $4);
+		                                         free($4); }
+		 | fbody BRK_IF '(' cnsexpr ')' ';'    { printf("if (%s) break;", $4);
+		                                         free($4); }
+		 | fbody if_cond '{' fbody '}'         { printf("}"); }
          | fbody loop '{' fbody '}'            { printf("}"); }
          ;
+
+if_cond  : ELSE IF '(' cnsexpr ')'             { printf("else if (%s) {", $4); }
+		 | IF '(' cnsexpr ')'                  { printf("if (%s) {", $3); }
+		 | ELSE                                { printf("else {"); }
+		 ;
 
 stmt     : cnsexpr                             { $$ = $1; }
          | decl_var                            { $$ = $1; }
@@ -192,6 +204,10 @@ expr     :
          | NAME MODEQ expr                     { $$ = malloc_concat ($1, " %= ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
+		 | NAME INCREMENT                      { $$ = malloc_concat ($1, "++"); }
+		 | NAME DECREMENT                      { $$ = malloc_concat ($1, "--"); }
+		 | INCREMENT NAME                      { $$ = malloc_concat ("++", $2); }
+		 | DECREMENT NAME                      { $$ = malloc_concat ("--", $2); }
          | expr EQ expr                        { $$ = malloc_concat ($1, " == ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($1); free($3); }
@@ -231,10 +247,11 @@ expr     :
          | DOUBLE                              { $$ = $1; }
          | STRING_LITERAL                      { $$ = $1; }
          | NAME                                { $$ = $1; }
+		 |                                     { $$ = ""; }
          ;
 
 /* TODO: Implement For, Repeat, Do-While, and Do-Until loops */
-loop     : FOR '(' ')'                         { printf("for () {"); }
+loop     : FOR '(' expr ';' expr ';' expr ')'  { printf("for (%s; %s; %s) {", $3, $5, $7); }
          | WHILE '(' expr ')'                  { printf("while (%s) {" , $3); free($3); }
          | UNTIL '(' expr ')'                  { printf("while (!(%s)) {" , $3); free($3); }
          | REPEAT '(' expr ')'                 { printf("repeat (%s) {", $3); free($3); }

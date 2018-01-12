@@ -1,0 +1,21 @@
+/*
+ * CN_Script: For Loop Example
+ *
+ * Description:
+ *     CN_Script offers "For Loops" in the same exact fashion as in C. Now, it
+ *     also allows for other different kinds of loops, which are shown in other
+ *     examples.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
+#import <io>
+
+func<int> main() {
+	int a = 0;
+
+	for (; a != 10; a++) {
+		printf("a = %d\n", a);
+	}
+}

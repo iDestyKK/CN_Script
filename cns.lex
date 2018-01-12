@@ -90,14 +90,17 @@ int_t          [0-9]+
   * CN_SCRIPT LOOPS & CONDITIONALS
   * ---------------------------------------------------------------------------
   */
-"if"      { return IF; }      /* For "If" statements                      */
-"else"    { return ELSE; }    /* If an "if" condition fails, execute this */
-"for"     { return FOR; }     /* For "For" loops                          */
-"do"      { return DO; }      /* For "Do-While" and "Do-Until" loops      */
-"while"   { return WHILE; }   /* For "While" and "Do-While" loops         */
-"until"   { return UNTIL; }   /* For "Do-Until" loops                     */
-"repeat"  { return REPEAT; }  /* Repeat X number of times                 */
-"loop"    { return LOOP;    } /* Loop forever until broken                */
+
+"if"          { return IF;      }  /* For "If" statements                      */
+"else"        { return ELSE;    }  /* If an "if" condition fails, execute this */
+"for"         { return FOR;     }  /* For "For" loops                          */
+"do"          { return DO;      }  /* For "Do-While" and "Do-Until" loops      */
+"while"       { return WHILE;   }  /* For "While" and "Do-While" loops         */
+"until"       { return UNTIL;   }  /* For "Do-Until" loops                     */
+"repeat"      { return REPEAT;  }  /* Repeat X number of times                 */
+"loop"        { return LOOP;    }  /* Loop forever until broken                */
+"continue_if" { return CONT_IF; }  /* Shortcut for continuing statements       */
+"break_if"    { return BRK_IF;  }  /* Shortcut for breaking statements         */
 
  /*
   * ---------------------------------------------------------------------------
@@ -119,6 +122,8 @@ int_t          [0-9]+
 "!="         { return NOTEQ; }
 "<="         { return LEQ; }
 ">="         { return GEQ; }
+"++"         { return INCREMENT; }
+"--"         { return DECREMENT; }
 
 ("&&"|"and") { return AND; }
 ("||"|"or")  { return OR; }
@@ -152,6 +157,11 @@ int_t          [0-9]+
 {double_t} {
 	yylval.str = strdup(yytext);
 	return DOUBLE;
+}
+
+"'"."'" {
+	yylval.str = strdup(yytext);
+	return STRING_LITERAL; //CHAR_LITERAL;
 }
 
 "\"".*"\"" {
@@ -211,6 +221,7 @@ int_t          [0-9]+
   * FUNCTIONS
   * ---------------------------------------------------------------------------
   */
+
 [\r\n]+ {
 	printf("%s", yytext);
 }

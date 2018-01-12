@@ -1,0 +1,45 @@
+/*
+ * CN_Script: Conditionals Example
+ *
+ * Description:
+ *     CN_Script offers "if-else" statements in the exact same fashion as in
+ *     the C Programming Language. The syntax is the exact same. However, you
+ *     can use alternative names for "&&", "||" and "^^" in compound
+ *     if statements.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
+#import <io>
+
+func main() {
+	int a = 0,
+	    b = 0;
+	
+	//Check a's value
+	if (a == 0) {
+		printf("a is 0!\n");
+	}
+	else
+	if (a < 0) {
+		printf("a is less than 0!\n");
+	}
+	else {
+		printf("a is greater than 0!\n");
+	}
+
+	//Check b's value
+	//if (b < 0 || b > 0) {
+	if (b < 0 or b > 0) {
+		printf("b is not 0...\n");
+	}
+	else
+	//if (b == 0 && a == 0) {
+	if (b == 0 and a == 0) {
+		printf("Both a and b are 0!\n");
+	}
+	else {
+		printf("B is 0!\n");
+	}
+}

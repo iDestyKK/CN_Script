@@ -1,0 +1,5 @@
+#cimport <stdlib.h>
+
+func<int> quit(int code) {
+	exit(code);
+}

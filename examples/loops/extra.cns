@@ -1,0 +1,21 @@
+/*
+ * CN_Script: Extra Loop Syntax Example
+ *
+ * Description:
+ *     CN_Script also offers extra syntax for condensing code down to a single
+ *     line. "break_if" and "continue_if" are a prime example of it.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
+#import <io>
+
+func<int> main() {
+	int a = 0;
+
+	for (; a != 10; a++) {
+		continue_if(a > 2);
+		printf("a = %d\n", a);
+	}
+}
