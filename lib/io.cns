@@ -1,15 +1,3 @@
 #cimport <stdio.h>
 #cimport <stdlib.h>
 #cimport <string.h>
-
-func error_print(char* str) {
-	fprintf(stderr, "%s", str);
-}
-
-func print(char* str) {
-	printf("%s", str);
-}
-
-func print_char(char c) {
-	printf("%c", c);
-}

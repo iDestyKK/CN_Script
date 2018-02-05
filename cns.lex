@@ -26,7 +26,7 @@
 %}
 
 %option noyywrap nounput yylineno
-%x      INLINE_C COMMENT FUNC_DECL
+%x      INLINE_C COMMENT FUNC_DECL CIMPORT
 
 ascii          [a-zA-Z_]
 ascii_num      [a-zA-Z0-9_]
@@ -52,13 +52,22 @@ int_t          [0-9]+
 "#import" {
 	/* CN_Script Import */
 	yylval.str = "import";
+	BEGIN CIMPORT;
 	return IMPORT;
 }
 
 "#cimport" {
 	/* C Import */
 	yylval.str = "include";
+	BEGIN CIMPORT;
 	return IMPORT;
+}
+
+<CIMPORT>"<"[^>]*">" {
+	yytext[yyleng - 1] = 0;
+	yylval.str = yytext + 1;
+	BEGIN 0;
+	return CIMPORT_STR;
 }
 
 "/*" {
@@ -93,6 +102,7 @@ int_t          [0-9]+
 
 "if"          { return IF;      }  /* For "If" statements                      */
 "else"        { return ELSE;    }  /* If an "if" condition fails, execute this */
+"eif"         { return ELSEIF;  }  /* An "if else" shortcut thingie            */
 "for"         { return FOR;     }  /* For "For" loops                          */
 "do"          { return DO;      }  /* For "Do-While" and "Do-Until" loops      */
 "while"       { return WHILE;   }  /* For "While" and "Do-While" loops         */
@@ -124,6 +134,7 @@ int_t          [0-9]+
 ">="         { return GEQ; }
 "++"         { return INCREMENT; }
 "--"         { return DECREMENT; }
+"->"         { return DEREFERENCE; }
 
 ("&&"|"and") { return AND; }
 ("||"|"or")  { return OR; }
@@ -148,6 +159,7 @@ int_t          [0-9]+
 "&"  |
 "^"  |
 "!"  |
+"."  |
 ";"  { return yytext[0]; }
 
 {int_t} { 
@@ -169,7 +181,7 @@ int_t          [0-9]+
 	return STRING_LITERAL;
 }
 
-{fname}+ |
+ /*{fname}+ | */
 {type}   |
 {templated_type}   |
 {name}   {

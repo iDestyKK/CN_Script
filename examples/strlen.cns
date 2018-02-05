@@ -1,0 +1,29 @@
+/*
+ * CN_Script: Simple Strlen implementation
+ *
+ * Description:
+ *     Proof-of-concept of how the C function of "strlen" can be implemented in
+ *     CN_Script. It's simply C code, of course, but it demonstrates that it
+ *     definitely can be done.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
+#import <io>
+
+func<int> cn_len(char* c) {
+	int l = 0;
+	until (*c == 0) {
+		l++;
+		c++;
+	}
+	return l;
+}
+
+func main() {
+	printf(
+		"%d\n",
+		cn_len("ya")
+	);
+}

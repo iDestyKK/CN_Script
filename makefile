@@ -14,7 +14,7 @@ LFLAGS = -t
 
 all: cns
 
-cns: cns.tab.c cns.yy.c sem.c
+cns: cns.tab.c cns.yy.c sem.c src/lib/handy/cnds/cn_vec.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 cns.tab.c: cns.y

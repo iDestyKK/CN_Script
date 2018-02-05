@@ -30,14 +30,14 @@
 }
 
 /* Passed via string */
-%token <str> ID CON ARR_STR ARG_STR QUOTE_STR STR IMPORT NAME FNAME TYPE
+%token <str> ID CON ARR_STR ARG_STR QUOTE_STR STR IMPORT NAME FNAME TYPE CIMPORT_STR
 
 /* Passed by other means */
 %token INT UINT FLOAT DOUBLE CHAR UCHAR STRING_LITERAL
 %token FUNC_TOP FUNC LEFT_PAREN RIGHT_PAREN FEND ANGLE_LT ANGLE_GT OBJECT
-%token IF ELSE FOR DO WHILE UNTIL REPEAT LOOP INCREMENT DECREMENT CONT_IF BRK_IF
-%token EQ ADDEQ SUBEQ MULEQ DIVEQ MODEQ LSEQ RSEQ ANDEQ OREQ XOREQ LEQ GEQ NOTEQ AND OR XOR
-%type <str> fargs arg stmt cnsexpr expr exprs decl_var more_var temp obj_decl
+%token IF ELSE ELSEIF FOR DO WHILE UNTIL REPEAT LOOP INCREMENT DECREMENT CONT_IF BRK_IF
+%token EQ ADDEQ SUBEQ MULEQ DIVEQ MODEQ LSEQ RSEQ ANDEQ OREQ XOREQ LEQ GEQ NOTEQ AND OR XOR DEREFERENCE
+%type <str> fargs arg stmt cnsexpr expr exprs decl_var more_var temp obj_decl type
 %type <str> INT
 %type <str> DOUBLE
 %type <str> STRING_LITERAL
@@ -59,23 +59,24 @@ external :                                     { }
          | external func                       { }
          ;
 
-import   : IMPORT '<' NAME '>'                 { import($1, "<>"  , $3); }
+import   : IMPORT CIMPORT_STR                  { import($1, "<>"  , $2); }
          | IMPORT STRING_LITERAL               { $2++;
 		                                         $2[strlen($2) - 1] = 0;
 		                                         import($1, "\"\"", $2); }
          ;
 
-object   : obj_decl '{' obj_body '}' ';' { printf("} %s;", $1); }
+object   : obj_decl '{' obj_body '}' ';' { if (IN_OBJ != 2) printf("} %s;", $1); IN_OBJ = 0; free(CUR_OBJ); }
          ;
 
 obj_decl : OBJECT '<' temp '>' NAME            { printf("typedef struct {");
-                                                 $$ = $5; }
+                                                 $$ = $5; IN_OBJ = 1; CUR_OBJ = strdup($5); }
          | OBJECT              NAME            { printf("typedef struct {");
-                                                 $$ = $2; }
+                                                 $$ = $2; IN_OBJ = 1; CUR_OBJ = strdup($2); }
          ;
 
 obj_body :                                     { }
          | obj_body stmt ';'                   { printf("%s;", $2); }
+         | obj_body func                       { }
          ;
     
 func     :                                     { }
@@ -83,11 +84,78 @@ func     :                                     { }
          ;
 
 func_decl: FUNC '<' NAME '>' '<' temp '>' NAME fargs
-                                               { printf("//%s\n%s %s(%s) {", $6, $3, $8, ($9 == NULL) ? "" : $9);
-                                                 freeifnull($9); freeifnull($6); }
-         | FUNC '<' NAME '>' NAME fargs        { printf("%s %s(%s) {", $3, $5, ($6 == NULL) ? "" : $6);
+                                               { if (IN_OBJ == 1) {
+											         IN_OBJ = 2;
+													 printf("}");
+												 }
+												 if (IN_OBJ == 2) {
+													 printf(
+														 "//%s\n%s %s_%s(%s* this%s%s) {",
+														 $6,
+														 $3,
+														 CUR_OBJ,
+														 $8,
+														 CUR_OBJ,
+														 ($9 == NULL) ? "" : ", ",
+														 ($9 == NULL) ? "" : $9
+													 );
+												 }
+												 else {
+													 printf(
+														 "//%s\n%s %s(%s) {",
+														 $6,
+														 $3,
+														 $8,
+														 ($9 == NULL) ? "" : $9
+													 );
+												 }
+                                                 freeifnull($9);
+												 freeifnull($6); }
+         | FUNC '<' NAME '>' NAME fargs        { if (IN_OBJ == 1) {
+												     IN_OBJ = 2;
+													 printf("} %s;", CUR_OBJ);
+												 }
+												 if (IN_OBJ == 2) {
+													 printf(
+														"%s %s_%s(%s* this%s%s) {" ,
+														$3,
+														CUR_OBJ,
+														$5,
+														CUR_OBJ,
+														($6 == NULL) ? "" : ", ",
+														($6 == NULL) ? "" : $6
+													 );
+												 }
+												 else {
+													 printf(
+														"%s %s(%s) {" ,
+														$3,
+														$5,
+														($6 == NULL) ? "" : $6
+													 );
+												 }
                                                  freeifnull($6); }
-         | FUNC NAME fargs                     { printf("%s(%s) {", $2, ($3 == NULL) ? "" : $3);
+         | FUNC NAME fargs                     { if (IN_OBJ == 1) {
+		                                             IN_OBJ = 2;
+													 printf("} %s;", CUR_OBJ); 
+												 }
+												 if (IN_OBJ == 2) {
+													 printf(
+														 "%s_%s(%s* this%s%s) {",
+														 CUR_OBJ,
+														 $2,
+														 CUR_OBJ,
+														 ($3 == NULL) ? "" : ", ",
+														 ($3 == NULL) ? "" : $3
+													 );
+												 }
+												 else {
+													 printf(
+														 "%s(%s) {",
+														 $2,
+														 ($3 == NULL) ? "" : $3
+													 );
+		                                         }
                                                  freeifnull($3); }
          ;
 
@@ -115,6 +183,7 @@ fbody    :                                     { }
          ;
 
 if_cond  : ELSE IF '(' cnsexpr ')'             { printf("else if (%s) {", $4); }
+		 | ELSEIF  '(' cnsexpr ')'             { printf("else if (%s) {", $3); }
 		 | IF '(' cnsexpr ')'                  { printf("if (%s) {", $3); }
 		 | ELSE                                { printf("else {"); }
 		 ;
@@ -138,6 +207,17 @@ expr     :
            NAME '=' expr                       { $$ = malloc_concat ($1, " = ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
+         | '(' exprs ')' '=' NAME '(' ')'      { $$ = malloc_concat ($5, "()");
+                                                 free($5); }
+         | '(' exprs ')' '=' NAME '(' exprs ')'{ $$ = malloc_concat ($5, "(");
+                                                 $$ = realloc_concat($$, $7);
+                                                 $$ = realloc_concat($$, ")");
+                                                 free($5); free($7); }
+	     /* TODO: Find out why this is broken */
+		 | '(' type ')' NAME                   { $$ = malloc_concat ("(", $2);
+		                                         $$ = realloc_concat($$, ")");
+												 $$ = realloc_concat($$, $4);
+												 free($2); free($4); }
          | expr OR expr                        { $$ = malloc_concat ($1, " || ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($1); free($3); }
@@ -168,10 +248,15 @@ expr     :
          | expr '^' expr                       { $$ = malloc_concat ($1, " ^ ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($1); free($3); }
+         | '&' expr                            { $$ = malloc_concat ("&", $2);
+                                                 freeifnull($2); }
          | expr '&' expr                       { $$ = malloc_concat ($1, " & ");
                                                  $$ = realloc_concat($$, $3);
-                                                 free($1); free($3); }
+                                                 freeifnull($1); freeifnull($3); }
          | expr '=' expr                       { $$ = malloc_concat ($1, " = ");
+                                                 $$ = realloc_concat($$, $3);
+                                                 free($1); free($3); }
+         | expr DEREFERENCE expr               { $$ = malloc_concat ($1, "->");
                                                  $$ = realloc_concat($$, $3);
                                                  free($1); free($3); }
          | NAME OREQ expr                      { $$ = malloc_concat ($1, " |= ");
@@ -232,6 +317,48 @@ expr     :
          | expr '>' '>' expr                   { $$ = malloc_concat ($1, " >> ");
                                                  $$ = realloc_concat($$, $4);
                                                  free($1); free($4); }
+		 | expr '.' NAME '(' ')'               { unsigned int i = 0;
+												 VAR_PAIR* p;
+												 for (; i < cn_vec_size(VAR_PAIRS); i++) {
+													 p = (VAR_PAIR*) cn_vec_at(VAR_PAIRS, i);
+													 if (strcmp(p->name, $1) == 0)
+														break;
+												 }
+												 if (i == cn_vec_size(VAR_PAIRS))
+													exit(1);
+
+												 $$ = malloc_concat (p->type, "_");
+												 $$ = realloc_concat($$, $3);
+												 $$ = realloc_concat($$, "(&");
+												 $$ = realloc_concat($$, $1);
+												 $$ = realloc_concat($$, ")");
+												 free($1);
+												 free($3);
+		                                       }
+		 | expr '.' NAME '(' exprs ')'         { unsigned int i = 0;
+												 VAR_PAIR* p;
+												 for (; i < cn_vec_size(VAR_PAIRS); i++) {
+													 p = (VAR_PAIR*) cn_vec_at(VAR_PAIRS, i);
+													 if (strcmp(p->name, $1) == 0)
+														break;
+												 }
+												 if (i == cn_vec_size(VAR_PAIRS))
+													exit(1);
+
+												 $$ = malloc_concat (p->type, "_");
+												 $$ = realloc_concat($$, $3);
+												 $$ = realloc_concat($$, "(&");
+												 $$ = realloc_concat($$, $1);
+												 $$ = realloc_concat($$, ", ");
+												 $$ = realloc_concat($$, $5);
+												 $$ = realloc_concat($$, ")");
+												 free($1);
+												 free($3);
+												 free($5);
+		                                       }
+         | expr '.' expr                       { $$ = malloc_concat ($1, ".");
+                                                 $$ = realloc_concat($$, $3);
+                                                 free($1); free($3); }
          | NAME '(' ')'                        { $$ = malloc_concat ($1, "()");
                                                  free($1); }
          | NAME '(' exprs ')'                  { $$ = malloc_concat ($1, "(");
@@ -254,35 +381,64 @@ expr     :
 loop     : FOR '(' expr ';' expr ';' expr ')'  { printf("for (%s; %s; %s) {", $3, $5, $7); }
          | WHILE '(' expr ')'                  { printf("while (%s) {" , $3); free($3); }
          | UNTIL '(' expr ')'                  { printf("while (!(%s)) {" , $3); free($3); }
-         | REPEAT '(' expr ')'                 { printf("repeat (%s) {", $3); free($3); }
+         | REPEAT '(' expr ')'                 { printf(
+													"int %s%d = 0; for (; %s%d < %s; %s%d++) {",
+													CNS_REPEAT_VAR, REPEAT_TOTAL,
+													CNS_REPEAT_VAR, REPEAT_TOTAL, $3,
+													CNS_REPEAT_VAR, REPEAT_TOTAL
+												 ); REPEAT_TOTAL++; free($3); }
          | LOOP                                { printf("while (1) {"); }
          | DO                                  { printf("do {"); }
          ;
 
-decl_var : NAME expr ',' more_var              { $$ = malloc_concat ($1, " " );
+type     : OBJECT NAME                         { $$ = malloc_concat ("struct", " ");
+		                                         $$ = realloc_concat($$, $2 );
+												 free($2);
+												 if (CUR_TYPE != NULL) {
+													free(CUR_TYPE);
+													CUR_TYPE = NULL;
+												 }
+												 CUR_TYPE = strdup($$); }
+         | NAME                                { $$ = $1;
+		                                         if (CUR_TYPE != NULL) {
+												     free(CUR_TYPE);
+													 CUR_TYPE = NULL;
+												 } 
+												 CUR_TYPE = strdup($1); }
+		 ;
+
+decl_var : type expr ',' more_var              { $$ = malloc_concat ($1, " " );
                                                  $$ = realloc_concat($$, $2  );
                                                  $$ = realloc_concat($$, ", ");
                                                  $$ = realloc_concat($$, $4  );
-                                                 free($4); }
-         | NAME '<' temp '>' expr ',' more_var { $$ = malloc_concat ($1, "_" );
+                                                 freeifnull($1); free($4);
+												 append_pair($2, CUR_TYPE); }
+         | type '<' temp '>' expr ',' more_var { $$ = malloc_concat ($1, "_" );
                                                  $$ = realloc_concat($$, $3  );
                                                  $$ = realloc_concat($$, " " );
                                                  $$ = realloc_concat($$, $5  );
                                                  $$ = realloc_concat($$, ", ");
                                                  $$ = realloc_concat($$, $7  );
-                                                 free($7); }
-         | NAME expr                           { $$ = malloc_concat ($1, " " );
-                                                 $$ = realloc_concat($$, $2  ); }
-         | NAME '<' temp '>' expr              { $$ = malloc_concat ($1, "_" );
+                                                 freeifnull($1); free($7);
+												 append_pair($5, CUR_TYPE); }
+         | type expr                           { $$ = malloc_concat ($1, " " );
+                                                 $$ = realloc_concat($$, $2  );
+												 freeifnull($1); 
+												 append_pair($2, CUR_TYPE); }
+         | type '<' temp '>' expr              { $$ = malloc_concat ($1, "_" );
                                                  $$ = realloc_concat($$, $3  );
                                                  $$ = realloc_concat($$, " " );
-                                                 $$ = realloc_concat($$, $5  ); }
+                                                 $$ = realloc_concat($$, $5  );
+												 freeifnull($1);
+												 append_pair($5, CUR_TYPE); }
          ;
 
 more_var : expr ',' more_var                   { $$ = malloc_concat ($1, ", ");
                                                  $$ = realloc_concat($$, $3  );
-                                                 free($3); }
-         | expr                                { $$ = malloc_concat ($1, ""  ); }
+                                                 free($3);
+												 append_pair($1, CUR_TYPE); }
+         | expr                                { $$ = malloc_concat ($1, ""  );
+		                                         append_pair($1, CUR_TYPE); }
          ;
 
 temp     : NAME ',' temp                       { $$ = malloc_concat ($1, "_" );
@@ -299,6 +455,9 @@ extern int yylineno;
 extern FILE* yyin;
 
 main(int argc, char** argv) {
+	REPEAT_TOTAL = 0;
+	IN_OBJ = 0;
+	VAR_PAIRS = cn_vec_init(VAR_PAIR);
     FILE* fp;
     if (argc == 1) {
         fprintf(stderr, "Usage: %s file\n", argv[0]);

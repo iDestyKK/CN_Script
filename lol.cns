@@ -1,0 +1,20 @@
+#import <io>
+
+object ya {
+	int a, b;
+
+	func<int> add() {
+		return this->a +
+		       this->b;
+	}
+};
+
+func main() {
+	ya at, ye;
+	at.a = 2;
+	at.b = 2;
+	ye.a = at.b;
+	ye.b = at.a + at.b + ye.a;
+	
+	printf("%d %d\n", at.add(), ye.add());
+}

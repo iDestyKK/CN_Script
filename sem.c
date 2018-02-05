@@ -150,6 +150,23 @@ void fend() {
 	printf("}");
 }
 
+void append_pair(char* name, char* type) {
+	VAR_PAIR tmp;
+	tmp.name = strdup(name);
+	tmp.type = strdup(type);
+	cn_vec_push_back(VAR_PAIRS, &tmp);
+}
+
+void clear_pairs() {
+	unsigned int i = 0;
+	for (; i < cn_vec_size(VAR_PAIRS); i++) {
+		VAR_PAIR* ii = (VAR_PAIR*) cn_vec_at(VAR_PAIRS, i);
+		free(ii->name);
+		free(ii->type);
+	}
+	cn_vec_clear(VAR_PAIRS);
+}
+
 /* Functions you shouldn't really use... */
 char* malloc_concat(char* s1, char* s2) {
 	size_t l1, l2;

@@ -1,0 +1,27 @@
+/*
+ * CN_Script: Repeat Loop Example
+ *
+ * Description:
+ *     CN_Script offers "Repeat Loops", which is a simpler way to write out a
+ *     loop that you simply go from 0 to N with. This kind of loop accepts a
+ *     constant integer, as well as an expression with variables.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
+#import <io>
+
+func<int> main() {
+	int a = 6;
+
+	/* Allow loops for specific (constant) number of times */
+	repeat (4) {
+		printf("This is repeated!\n");
+	}
+
+	/* Allow loops for dynamic number of times */
+	repeat (a + 1) {
+		printf("Oh yes\n");
+	}
+}
