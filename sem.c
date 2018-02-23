@@ -15,6 +15,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 #include <unistd.h>
 
 #include "cns.h"
@@ -26,9 +27,12 @@ void import(char* type, char* bounds, char* val) {
 		printf("//%s %c%s%c\n", type, bounds[0], val, bounds[1]);
 		char path    [MAX_PATH];
 		char exe_path[MAX_PATH];
+		int plen;
 
 		//Get the path of the executable. This'll be handy later.
-		readlink("/proc/self/exe", exe_path, MAX_PATH);
+		plen = readlink("/proc/self/exe", exe_path, MAX_PATH);
+		if (plen < MAX_PATH && plen != -1)
+			exe_path[plen] = '\0';
 
 		if (bounds[0] == '\"' && bounds[1] == bounds[0]) {
 			//getcwd(path, MAX_PATH);
@@ -100,7 +104,7 @@ void import(char* type, char* bounds, char* val) {
 			close(pipes[1][0]);
 
 			execvp(exe_path, argv);	
-			fprintf(stderr, "[FATAL ERROR] Failed to execvp child process.\n");
+			fprintf(stderr, "[FATAL ERROR] Failed to execvp child process. (%d)\n", errno);
 		}
 		else {
 			close(pipes[0][0]);
