@@ -1,0 +1,57 @@
+//Import the C library version.
+#cimport "./c/cn_grid.h"
+#cimport "./c/cn_grid.c"
+
+object grid {
+	//Variables
+	CN_GRID data;
+	
+	//Functions
+	func init(cng_uint size) {
+		this->data = cn_grid_init(size);
+	}
+
+	func init_size(cng_uint size, cng_uint width, cng_uint height) {
+		this->data = cn_grid_init_size(size, width, height);
+	}
+
+	func resize_x(cng_uint w) {
+		cn_grid_resize_x(this->data, w);
+	}
+
+	func resize_y(cng_uint h) {
+		cn_grid_resize_y(this->data, h);
+	}
+
+	func resize(cng_uint w, cng_uint h) {
+		cn_grid_resize(this->data, w, h);
+	}
+
+	func<cng_uint> size_x() {
+		return cn_grid_size_x(this->data);
+	}
+
+	func<cng_uint> size_y() {
+		return cn_grid_size_y(this->data);
+	}
+
+	func<cng_uint> size() {
+		return cn_grid_size(this->data);
+	}
+
+	func<void*> at(cng_uint a, cng_uint b) {
+		return cn_grid_at(this->data, a, b);
+	}
+
+	func clear() {
+		cn_grid_clear(this->data);
+	}
+
+	func swap(cng_uint x1, cng_uint y1, cng_uint x2, cng_uint y2) {
+		cn_grid_swap(this->data, x1, y1, x2, y2);
+	}
+
+	func free() {
+		cn_grid_free(this->data);
+	}
+};

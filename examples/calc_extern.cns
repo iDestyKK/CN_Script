@@ -1,0 +1,32 @@
+/*
+ * CN_Script: Calc Class Example
+ *
+ * Description:
+ *     CN_Script offers "objects", which are structs with an improved syntax.
+ *     Because of this, functions are allowed to be defined inside of objects.
+ *     This calculator example shows a mix of C code along with an object with
+ *     variables and a function inside.
+ *
+ *     The calculator accepts the syntax of "2 + 2", "4.2 / 3.21", etc. There
+ *     MUST be spaces in between each number and symbol. It will run forever.
+ *
+ * Author:
+ *     Clara Nguyen
+ */
+
+#import <io>
+#import "calc_class.cns"
+
+func main() {
+	//Make a new object
+	calc obj;
+	
+	//Loop forever
+	loop {
+		//Read in numbers and operation
+		printf("Enter expression (e.g. 2 + 2): ");
+		scanf("%lf %c %lf", &obj.a, &obj.op, &obj.b);
+
+		obj.operate();
+	}
+}

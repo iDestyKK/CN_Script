@@ -20,8 +20,6 @@
 
 #include "cns.h"
 
-#define MAX_PATH 4096
-
 void import(char* type, char* bounds, char* val) {
 	if (strcmp(type, "import") == 0) {
 		printf("//%s %c%s%c\n", type, bounds[0], val, bounds[1]);
@@ -30,7 +28,7 @@ void import(char* type, char* bounds, char* val) {
 		int plen;
 
 		//Get the path of the executable. This'll be handy later.
-		plen = readlink("/proc/self/exe", exe_path, MAX_PATH);
+		strcpy(exe_path, EXEC_PATH);
 		if (plen < MAX_PATH && plen != -1)
 			exe_path[plen] = '\0';
 
@@ -48,12 +46,14 @@ void import(char* type, char* bounds, char* val) {
 					break;
 				buf--;
 			}
-			strcat(path, "/");
+			if (strlen(path) != 0)
+				strcat(path, "/");
+			chdir(path);
 			strcat(path, val);
 		}
 		else
 		if (bounds[0] == '<' && bounds[1] == '>') {
-			readlink("/proc/self/exe", path, MAX_PATH);
+			strcpy(path, EXEC_PATH);
 
 			//Get rid of executable name
 			size_t buf = strlen(path) - 1;
@@ -65,7 +65,9 @@ void import(char* type, char* bounds, char* val) {
 					break;
 				buf--;
 			}
+
 			strcat(path, "/lib/");
+			chdir(path);
 			strcat(path, val);
 			strcat(path, ".cns");
 		}
@@ -78,7 +80,7 @@ void import(char* type, char* bounds, char* val) {
 
 		//Now for the fun part... let's put the data in here.
 		char* argv[3];
-		argv[0] = exe_path;
+		argv[0] = EXEC_PATH;
 		argv[1] = path;
 		argv[2] = NULL;
 
@@ -103,7 +105,24 @@ void import(char* type, char* bounds, char* val) {
 			close(pipes[0][1]);
 			close(pipes[1][0]);
 
-			execvp(exe_path, argv);	
+			//Change the directory to the file in question
+			/*
+			char chg[MAX_PATH];
+			strcpy(path, chg);
+			size_t buf = strlen(path) - 1;
+			char t;
+			while (1) {
+				t = path[buf];
+				path[buf] = 0;
+				if (t == '/' || buf == 0)
+					break;
+				buf--;
+			}
+			fprintf(stderr, "CHDIR: %s\n", chg);
+			chdir(chg);
+			*/
+
+			execvp(EXEC_PATH, argv);	
 			fprintf(stderr, "[FATAL ERROR] Failed to execvp child process. (%d)\n", errno);
 		}
 		else {
@@ -122,6 +141,8 @@ void import(char* type, char* bounds, char* val) {
 			//Hi Dr. Plank
 			int status;
 			waitpid(fk, &status, 0);
+			close(pipes[0][1]);
+			close(pipes[1][0]);
 		}
 
 		//[SCRAPPED] Cheap-ass way: Copy file to stdout.
@@ -145,8 +166,30 @@ void import(char* type, char* bounds, char* val) {
 			path
 		);
 	}
-	else
-		printf("#%s %c%s%c", type, bounds[0], val, bounds[1]);
+	else {
+		char cwd[MAX_PATH];
+		if (getcwd(cwd, MAX_PATH) == NULL) {
+			fprintf(stderr, "Failed to get current working directory.\n");
+			exit(2);
+		}
+
+		char ex[MAX_PATH];
+		strcpy(ex, CUR_FILE);
+		size_t buf = strlen(ex) - 1;
+		char t;
+		while (1) {
+			t = ex[buf];
+			ex[buf] = 0;
+			if (t == '/' || buf == 0)
+				break;
+			buf--;
+		}
+
+		if (bounds[0] == '\"')
+			printf("#%s %c%s/%s%c", type, bounds[0], ex, val, bounds[1]);
+		else
+			printf("#%s %c%s%c", type, bounds[0], val, bounds[1]);
+	}
 }
 
 /* Functions */

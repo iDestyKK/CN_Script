@@ -19,6 +19,7 @@
 
 /* Macros */
 #define CNS_REPEAT_VAR "__CN_SCRIPT_REPEAT_"
+#define MAX_PATH 4096
 
 /* Cool structs I guess */
 typedef struct var_pair {
@@ -30,8 +31,10 @@ typedef struct var_pair {
 char*  CUR_FILE;
 int    REPEAT_TOTAL;
 int    IN_OBJ;
+int    EXEC_LEN;
 char*  CUR_OBJ;
 char*  CUR_TYPE;
+char   EXEC_PATH[MAX_PATH];
 CN_VEC VAR_PAIRS;
 
 /* Functions */

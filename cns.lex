@@ -70,6 +70,13 @@ int_t          [0-9]+
 	return CIMPORT_STR;
 }
 
+<CIMPORT>"\"".*"\"" {
+	yytext[yyleng - 1] = 0;
+	yylval.str = yytext + 1;
+	BEGIN 0;
+	return STRING_LITERAL;
+}
+
 "/*" {
 	/* Multi-line comment */
 	printf("%s", yytext);
@@ -143,6 +150,8 @@ int_t          [0-9]+
 "("  |
 ")"  |
 "{"  |
+"["  |
+"]"  |
 "}"  |
 "<"  |
 ">"  |

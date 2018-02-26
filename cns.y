@@ -60,9 +60,7 @@ external :                                     { }
          ;
 
 import   : IMPORT CIMPORT_STR                  { import($1, "<>"  , $2); }
-         | IMPORT STRING_LITERAL               { $2++;
-		                                         $2[strlen($2) - 1] = 0;
-		                                         import($1, "\"\"", $2); }
+         | IMPORT STRING_LITERAL               { import($1, "\"\"", $2); }
          ;
 
 object   : obj_decl '{' obj_body '}' ';' { if (IN_OBJ != 2) printf("} %s;", $1); IN_OBJ = 0; free(CUR_OBJ); }
@@ -167,9 +165,11 @@ arg      : NAME NAME ',' arg                   { $$ = malloc_concat ($1, " " );
                                                  $$ = realloc_concat($$, $2  );
                                                  $$ = realloc_concat($$, ", ");
                                                  $$ = realloc_concat($$, $4  );
+												 append_pair($2, $1);
                                                  free($4); }
          | NAME NAME                           { $$ = malloc_concat ($1, " " );
-                                                 $$ = realloc_concat($$, $2  ); }
+                                                 $$ = realloc_concat($$, $2  );
+												 append_pair($2, $1); }
          ;
 
 fbody    :                                     { }
@@ -230,6 +230,8 @@ expr     :
          | expr '+' expr                       { $$ = malloc_concat ($1, " + ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($1); free($3); }
+         | '-' expr                            { $$ = malloc_concat ("-", $2);
+                                                 free($2); }
          | expr '-' expr                       { $$ = malloc_concat ($1, " - ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($1); free($3); }
@@ -259,34 +261,34 @@ expr     :
          | expr DEREFERENCE expr               { $$ = malloc_concat ($1, "->");
                                                  $$ = realloc_concat($$, $3);
                                                  free($1); free($3); }
-         | NAME OREQ expr                      { $$ = malloc_concat ($1, " |= ");
+         | expr OREQ expr                      { $$ = malloc_concat ($1, " |= ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
-         | NAME XOREQ expr                     { $$ = malloc_concat ($1, " ^= ");
+         | expr XOREQ expr                     { $$ = malloc_concat ($1, " ^= ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
-         | NAME ANDEQ expr                     { $$ = malloc_concat ($1, " &= ");
+         | expr ANDEQ expr                     { $$ = malloc_concat ($1, " &= ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
-         | NAME LSEQ expr                      { $$ = malloc_concat ($1, " <<= ");
+         | expr LSEQ expr                      { $$ = malloc_concat ($1, " <<= ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
-         | NAME RSEQ expr                      { $$ = malloc_concat ($1, " >>= ");
+         | expr RSEQ expr                      { $$ = malloc_concat ($1, " >>= ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
-         | NAME ADDEQ expr                     { $$ = malloc_concat ($1, " += ");
+         | expr ADDEQ expr                     { $$ = malloc_concat ($1, " += ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
-         | NAME SUBEQ expr                     { $$ = malloc_concat ($1, " -= ");
+         | expr SUBEQ expr                     { $$ = malloc_concat ($1, " -= ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
-         | NAME MULEQ expr                     { $$ = malloc_concat ($1, " *= ");
+         | expr MULEQ expr                     { $$ = malloc_concat ($1, " *= ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
-         | NAME DIVEQ expr                     { $$ = malloc_concat ($1, " /= ");
+         | expr DIVEQ expr                     { $$ = malloc_concat ($1, " /= ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
-         | NAME MODEQ expr                     { $$ = malloc_concat ($1, " %= ");
+         | expr MODEQ expr                     { $$ = malloc_concat ($1, " %= ");
                                                  $$ = realloc_concat($$, $3);
                                                  free($3); }
 		 | NAME INCREMENT                      { $$ = malloc_concat ($1, "++"); }
@@ -359,6 +361,11 @@ expr     :
          | expr '.' expr                       { $$ = malloc_concat ($1, ".");
                                                  $$ = realloc_concat($$, $3);
                                                  free($1); free($3); }
+		 | expr '[' expr ']'                   { $$ = malloc_concat ($1, "[");
+		                                         $$ = realloc_concat($$, $3);
+												 $$ = realloc_concat($$, "]");
+												 free($1); free($3);
+		                                       }
          | NAME '(' ')'                        { $$ = malloc_concat ($1, "()");
                                                  free($1); }
          | NAME '(' exprs ')'                  { $$ = malloc_concat ($1, "(");
@@ -450,6 +457,7 @@ temp     : NAME ',' temp                       { $$ = malloc_concat ($1, "_" );
 /* Parser */
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 
 extern int yylineno;
 extern FILE* yyin;
@@ -458,6 +466,10 @@ main(int argc, char** argv) {
 	REPEAT_TOTAL = 0;
 	IN_OBJ = 0;
 	VAR_PAIRS = cn_vec_init(VAR_PAIR);
+	EXEC_LEN = readlink("/proc/self/exe", EXEC_PATH, MAX_PATH);
+	if (EXEC_LEN < MAX_PATH && EXEC_LEN != -1)
+		EXEC_PATH[EXEC_LEN] = '\0';
+
     FILE* fp;
     if (argc == 1) {
         fprintf(stderr, "Usage: %s file\n", argv[0]);
