@@ -1,5 +1,0 @@
-#import <io>
-
-func main() {
-	printf("ya\n");
-}
